@@ -16,6 +16,29 @@ class KMeans:
         """
         Fits K-Means to the provided data.
         """
+        if initial_centroids is not None:
+            self.centroids = [list(c) for c in initial_centroids]
+        else:
+            random.seed(42)
+            self.centroids = [list(p) for p in random.sample(data, self.k)]
+
+        for _ in range(self.max_iters):
+            clusters = [[] for _ in range(self.k)]
+            for point in data:
+                label = self.predict(point)
+                clusters[label].append(point)
+
+            new_centroids = []
+            for i in range(self.k):
+                if clusters[i]:
+                    new_centroids.append(self.compute_centroid(clusters[i]))
+                else:
+                    new_centroids.append(self.centroids[i])
+
+            if new_centroids == self.centroids:
+                break
+
+            self.centroids = new_centroids
 
         # Assign final labels
         self.labels = [self.get_cluster_label(point) for point in data]
@@ -25,7 +48,7 @@ class KMeans:
         """
         Predicts the cluster label for a given point.
         """
-
+        distances = [self.euclidean_distance(point, centroid) for centroid in self.centroids]
         return distances.index(min(distances))
 
 
@@ -33,7 +56,7 @@ class KMeans:
         """
         Helper function to determine a cluster label.
         """
-
+        distances = [self.euclidean_distance(point, centroid) for centroid in self.centroids]
         return distances.index(min(distances))
 
 
